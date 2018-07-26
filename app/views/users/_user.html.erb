@@ -1,0 +1,9 @@
+<li>
+  <%= gravatar_for user, size: 50 %>
+  <%= link_to user.name, user %>
+  <!-- もし自分が管理者ユーザーでの時、userインデックスにデリートボタンを表示する -->
+  <!-- かつ上記の場合で、対象ユーザーがcurrent_user(admin)ではない場合 -->
+  <% if current_user.admin? && !current_user?(user) %>
+  | <%= link_to "delete", user, method: :delete, data: {confirm: "You sure?"} %>
+  <% end %>
+</li>
