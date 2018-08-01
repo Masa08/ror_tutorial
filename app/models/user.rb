@@ -26,16 +26,20 @@ class User < ApplicationRecord
       BCrypt::Password.create(string, cost: cost)
     end
 
+    # tokenの作成
     def self.new_token
       SecureRandom.urlsafe_base64
     end
 
+    # 渡されたトークンがダイジェストと一致したらtrueを返す
     def authenticated?(attribute, token)
       digest = send("#{attribute}_digest")
       return false if digest.nil?
+      # ハッシュ化されたtokenは、tokenと一致しますか？多分is_passwordでdigestをtokenに戻しているイメージ。
       BCrypt::Password.new(digest).is_password?(token)
     end
 
+    # remember tokenを作成して、そのtokenをハッシュ化してデータベースに保存。
     def remember
       self.remember_token = User.new_token
       update_attribute(:remember_digest, User.digest(remember_token))
@@ -69,7 +73,9 @@ class User < ApplicationRecord
     end
 
     def feed
+      # フォローしているユーザー全員のidを取得する
       following_ids = "SELECT followed_id FROM relationships WHERE follower_id = :user_id"
+      # フォローしているユーザーのマイクロポストと自分のマイクロポストを取得する。第二引数はuser_idに何を入れるかを定義している。
       Micropost.where("user_id IN (#{following_ids})
                        OR user_id = :user_id", user_id: id)
     end
